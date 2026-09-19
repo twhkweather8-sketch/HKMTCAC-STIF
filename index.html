@@ -1,516 +1,257 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HKMTCAC Storm Impact Level Forecast</title>
-    <style>
-        :root {
-            --bg-dark: #0f172a;
-            --panel-bg: #1e293b;
-            --text-main: #f8fafc;
-            --text-sub: #94a3b8;
-            --orange: #f97316;
-            --red: #ef4444;
-            --blue: #3b82f6;
-            --purple: #a855f7;
-            --teal: #14b8a6;
-            --green: #22c55e;
-            --yellow: #eab308;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            padding-bottom: 50px;
-        }
-        .main-wrapper { max-width: 1100px; width: 100%; }
-
-        /* Header */
-        .forecast-banner {
-            background: linear-gradient(90deg, #9a3412, var(--orange));
-            border-radius: 12px;
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            box-shadow: 0 4px 20px rgba(249, 115, 22, 0.3);
-            transition: all 0.3s ease;
-        }
-        .header-left { display: flex; align-items: center; gap: 15px; }
-        .header-logo {
-            width: 60px; height: 60px; object-fit: contain;
-            background: rgba(255,255,255,0.1); border-radius: 50%; padding: 5px;
-        }
-        .forecast-banner h1 { margin: 0; font-size: 22px; color: white; }
-        .forecast-banner .subtitle { margin: 5px 0 0 0; font-size: 14px; color: rgba(255,255,255,0.8); }
-        .forecast-badge {
-            background: rgba(0,0,0,0.3); padding: 10px 20px; border-radius: 30px;
-            font-weight: bold; font-size: 16px; color: white;
-            border: 2px solid white; transition: all 0.3s ease; text-align: center;
-        }
-
-        /* Timeline */
-        .timeline-section {
-            background-color: var(--panel-bg); border-radius: 12px;
-            padding: 25px; margin-bottom: 25px; overflow-x: auto;
-        }
-        .timeline-header {
-            display: flex; justify-content: space-between;
-            border-bottom: 1px solid #334155; padding-bottom: 10px;
-            margin-bottom: 20px; font-weight: bold; color: var(--text-sub); font-size: 14px;
-        }
-        .gantt-chart {
-            display: grid; grid-template-columns: 120px repeat(24, 1fr);
-            gap: 2px; position: relative; min-width: 800px;
-        }
-        .time-labels {
-            display: grid; grid-template-columns: 120px repeat(6, 1fr);
-            gap: 2px; margin-bottom: 10px; font-size: 11px;
-            color: var(--text-sub); text-align: center; min-width: 800px;
-        }
-        .time-label {
-            border-left: 1px solid #334155;
-            display: flex; justify-content: center; align-items: center;
-        }
-        .row-label {
-            font-size: 13px; color: var(--text-sub); display: flex;
-            align-items: center; justify-content: flex-end;
-            padding-right: 10px; height: 40px;
-        }
-        .gantt-bar {
-            height: 40px; border-radius: 6px; display: flex;
-            align-items: center; justify-content: center;
-            font-size: 11px; font-weight: bold; color: white;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            transition: all 0.3s ease; position: relative;
-            text-align: center; line-height: 1.2; padding: 0 5px;
-            border: 1px solid transparent;
-        }
-        .bar-wind-strong { background-color: var(--blue); }
-        .bar-wind-gale { background-color: var(--orange); }
-        .bar-wind-storm { background-color: var(--red); }
-        .bar-rain-showers { background-color: #8b5cf6; }
-        .bar-rain-heavy { background-color: #6d28d9; }
-        .bar-surge { background-color: var(--teal); border: 2px solid white; }
-
-        /* Action Cards */
-        .cards-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px; margin-top: 25px;
-        }
-        .card {
-            background-color: var(--panel-bg); border-radius: 12px;
-            padding: 20px; border-top: 4px solid var(--orange);
-            transition: border-color 0.3s ease;
-        }
-        .card h3 { margin-top: 0; display: flex; align-items: center; gap: 10px; font-size: 16px; }
-        .card ul { padding-left: 20px; margin: 0; color: var(--text-sub); font-size: 14px; line-height: 1.6; }
-        .card ul li strong { color: white; }
-
-        /* WIM Drawer */
-        .wim-drawer {
-            margin-top: 30px; background-color: var(--panel-bg);
-            border-radius: 12px; overflow: hidden;
-        }
-        .wim-header {
-            padding: 15px 20px; cursor: pointer; display: flex;
-            justify-content: space-between; align-items: center;
-            font-weight: bold; color: var(--text-sub);
-            border-bottom: 1px solid #334155;
-            background-color: rgba(255,255,255,0.02);
-        }
-        .wim-content { padding: 20px; display: none; }
-        .wim-content.active { display: block; }
-        .wim-layout {
-            display: grid; grid-template-columns: 1.2fr 1fr; gap: 30px;
-        }
-        .matrix-container { overflow-x: auto; }
-        .matrix-grid {
-            display: grid; grid-template-columns: 90px repeat(8, 1fr);
-            grid-template-rows: repeat(8, 35px); gap: 3px; min-width: 500px;
-        }
-        .label-y {
-            font-size: 10px; color: var(--text-sub); display: flex;
-            align-items: center; justify-content: flex-end;
-            padding-right: 8px; text-align: right;
-        }
-        .label-x {
-            font-size: 10px; color: var(--text-sub); display: flex;
-            align-items: flex-end; justify-content: center;
-            text-align: center; padding-bottom: 5px;
-            writing-mode: vertical-rl; transform: rotate(180deg);
-        }
-        .cell {
-            border-radius: 3px; cursor: pointer;
-            transition: all 0.2s ease; position: relative;
-        }
-        .cell:hover { transform: scale(1.1); z-index: 10; border: 1px solid white; }
-        .c-grey { background-color: #334155; }
-        .c-blue { background-color: #1e3a8a; }
-        .c-green { background-color: #166534; }
-        .c-yellow { background-color: #854d0e; }
-        .c-orange { background-color: #9a3412; }
-        .c-red { background-color: #7f1d1d; }
-        .c-dark { background-color: #450a0a; }
-        .cell.active {
-            border: 2px solid white;
-            box-shadow: 0 0 10px rgba(255,255,255,0.8);
-            z-index: 20;
-        }
-        .cell.active::after {
-            content: '🌀'; position: absolute;
-            top: 50%; left: 50%; transform: translate(-50%, -50%);
-            font-size: 16px; animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0% { transform: translate(-50%, -50%) scale(1); }
-            50% { transform: translate(-50%, -50%) scale(1.2); }
-            100% { transform: translate(-50%, -50%) scale(1); }
-        }
-        .text-panel {
-            background-color: #0f172a; padding: 20px;
-            border-radius: 8px; display: flex;
-            flex-direction: column; gap: 15px;
-        }
-        .text-header {
-            display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid #334155; padding-bottom: 10px;
-        }
-        .text-header h2 { margin: 0; font-size: 16px; color: white; }
-        .text-header .badge {
-            padding: 4px 10px; border-radius: 15px; font-size: 12px;
-            font-weight: bold; background: var(--orange); color: white;
-        }
-        .info-card {
-            background: #1e293b; border-radius: 6px;
-            padding: 12px; border-left: 3px solid var(--orange);
-        }
-        .info-card h3 { margin: 0 0 8px 0; font-size: 13px; color: white; }
-        .info-card p, .info-card ul {
-            margin: 0; font-size: 12px; color: var(--text-sub); line-height: 1.5;
-        }
-        .info-card ul { padding-left: 15px; }
-        .disclaimer {
-            text-align: center; font-size: 12px;
-            color: var(--text-sub); margin-top: 20px;
-            border-top: 1px solid #334155; padding-top: 15px;
-        }
-
-        @media (max-width: 900px) {
-            .wim-layout { grid-template-columns: 1fr; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HKMTCAC 風暴影響程度預報</title>
+<style>
+:root{--bg-dark:#0f172a;--panel-bg:#1e293b;--text-main:#f8fafc;--text-sub:#94a3b8;--orange:#f97316;--red:#ef4444;--blue:#3b82f6;--teal:#14b8a6;--green:#22c55e;--yellow:#eab308;}
+body{font-family:'Segoe UI',Tahoma,sans-serif;background:var(--bg-dark);color:var(--text-main);margin:0;padding:20px;display:flex;justify-content:center;padding-bottom:50px;}
+.main-wrapper{max-width:1100px;width:100%;}
+.forecast-banner{background:linear-gradient(90deg,#9a3412,var(--orange));border-radius:12px;padding:20px;display:flex;justify-content:space-between;align-items:center;margin-bottom:25px;box-shadow:0 4px 20px rgba(249,115,22,0.3);transition:all 0.3s ease;}
+.header-left{display:flex;align-items:center;gap:15px;}
+.header-logo{width:60px;height:60px;object-fit:contain;background:rgba(255,255,255,0.1);border-radius:50%;padding:5px;}
+.forecast-banner h1{margin:0;font-size:22px;color:white;}
+.forecast-banner .subtitle{margin:5px 0 0 0;font-size:14px;color:rgba(255,255,255,0.8);}
+.forecast-badge{background:rgba(0,0,0,0.3);padding:10px 20px;border-radius:30px;font-weight:bold;font-size:16px;color:white;border:2px solid white;text-align:center;}
+.timeline-section{background-color:var(--panel-bg);border-radius:12px;padding:25px;margin-bottom:25px;overflow-x:auto;}
+.timeline-header{display:flex;justify-content:space-between;border-bottom:1px solid #334155;padding-bottom:10px;margin-bottom:20px;font-weight:bold;color:var(--text-sub);font-size:14px;}
+.gantt-chart{display:grid;grid-template-columns:120px repeat(24,1fr);gap:2px;min-width:800px;}
+.time-labels{display:grid;grid-template-columns:120px repeat(6,1fr);gap:2px;margin-bottom:10px;font-size:11px;color:var(--text-sub);text-align:center;min-width:800px;}
+.time-label{border-left:1px solid #334155;display:flex;justify-content:center;align-items:center;}
+.row-label{font-size:13px;color:var(--text-sub);display:flex;align-items:center;justify-content:flex-end;padding-right:10px;height:40px;}
+.gantt-bar{height:40px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;color:white;box-shadow:0 2px 5px rgba(0,0,0,0.2);padding:0 5px;}
+.bar-wind-strong{background-color:var(--blue);}
+.bar-wind-gale{background-color:var(--orange);}
+.bar-wind-storm{background-color:var(--red);}
+.bar-rain-showers{background-color:#8b5cf6;}
+.bar-rain-heavy{background-color:#6d28d9;}
+.bar-surge{background-color:var(--teal);border:2px solid white;}
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;margin-top:25px;}
+.card{background-color:var(--panel-bg);border-radius:12px;padding:20px;border-top:4px solid var(--orange);}
+.card h3{margin-top:0;display:flex;align-items:center;gap:10px;font-size:16px;}
+.card ul{padding-left:20px;margin:0;color:var(--text-sub);font-size:14px;line-height:1.6;}
+.wim-drawer{margin-top:30px;background-color:var(--panel-bg);border-radius:12px;overflow:hidden;}
+.wim-header{padding:15px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:bold;color:var(--text-sub);background-color:rgba(255,255,255,0.02);}
+.wim-content{padding:20px;display:none;}
+.wim-content.active{display:block;}
+.wim-layout{display:grid;grid-template-columns:1.2fr 1fr;gap:30px;}
+.matrix-container{overflow-x:auto;}
+.matrix-grid{display:grid;grid-template-columns:90px repeat(8,1fr);grid-template-rows:repeat(8,35px);gap:3px;min-width:500px;}
+.label-y{font-size:10px;color:var(--text-sub);display:flex;align-items:center;justify-content:flex-end;padding-right:8px;text-align:right;}
+.label-x{font-size:10px;color:var(--text-sub);display:flex;align-items:flex-end;justify-content:center;text-align:center;padding-bottom:5px;writing-mode:vertical-rl;transform:rotate(180deg);}
+.cell{border-radius:3px;position:relative;}
+.c-grey{background-color:#334155;}.c-blue{background-color:#1e3a8a;}
+.c-green{background-color:#166534;}.c-yellow{background-color:#854d0e;}
+.c-orange{background-color:#9a3412;}.c-red{background-color:#7f1d1d;}
+.c-dark{background-color:#450a0a;}
+.cell.active{border:2px solid white;box-shadow:0 0 10px rgba(255,255,255,0.8);z-index:20;}
+.cell.active::after{content:'🌀';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:16px;}
+.text-panel{background-color:#0f172a;padding:20px;border-radius:8px;display:flex;flex-direction:column;gap:15px;}
+.text-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #334155;padding-bottom:10px;}
+.text-header h2{margin:0;font-size:16px;}
+.text-header .badge{padding:4px 10px;border-radius:15px;font-size:12px;font-weight:bold;background:var(--orange);color:white;}
+.info-card{background:#1e293b;border-radius:6px;padding:12px;border-left:3px solid var(--orange);}
+.info-card h3{margin:0 0 8px 0;font-size:13px;color:white;}
+.info-card p,.info-card ul{margin:0;font-size:12px;color:var(--text-sub);line-height:1.5;}
+.info-card ul{padding-left:15px;}
+.disclaimer{text-align:center;font-size:12px;color:var(--text-sub);margin-top:20px;border-top:1px solid #334155;padding-top:15px;}
+@media(max-width:900px){.wim-layout{grid-template-columns:1fr;}}
+</style>
 </head>
 <body>
-
 <div class="main-wrapper">
-    <!-- Header -->
-    <div class="forecast-banner" id="pub-banner">
-        <div class="header-left">
-            <!-- The logo will load if you have logo.png in the same folder -->
-            <img src="logo.png" alt="HKMTCAC Logo" class="header-logo" onerror="this.style.display='none'">
-            <div>
-                <h1 id="pub-title">🌀 HKMTCAC 風暴影響程度預報</h1>
-                <p class="subtitle">Storm Impact Level Forecast | <span id="pub-time">Updated: --</span></p>
-            </div>
-        </div>
-        <div class="forecast-badge" id="pub-badge">FORECAST IMPACT LEVEL: LOADING...</div>
-    </div>
 
-    <!-- Timeline -->
-    <div class="timeline-section">
-        <div class="timeline-header">
-            <span>風雨影響時序 (Impact Timeline)</span>
-            <span>Forecast is subject to change</span>
-        </div>
-        <div class="time-labels">
-            <div></div>
-            <div class="time-label" id="pub-time-1">--</div>
-            <div class="time-label" id="pub-time-2">--</div>
-            <div class="time-label" id="pub-time-3">--</div>
-            <div class="time-label" id="pub-time-4">--</div>
-            <div class="time-label" id="pub-time-5">--</div>
-            <div class="time-label" id="pub-time-6">--</div>
-        </div>
-        <div class="gantt-chart">
-            <div class="row-label">市區風力<br>Urban Wind</div>
-            <div class="gantt-bar bar-wind-strong" id="pub-bar-urban" style="grid-column: span 24;">--</div>
-            <div class="row-label">離岸/高地風力<br>Offshore Wind</div>
-            <div class="gantt-bar bar-wind-gale" id="pub-bar-offshore" style="grid-column: span 24;">--</div>
-            <div class="row-label">降雨<br>Rainfall</div>
-            <div class="gantt-bar bar-rain-showers" id="pub-bar-rain" style="grid-column: span 24;">--</div>
-            <div class="row-label">風暴潮<br>Storm Surge</div>
-            <div class="gantt-bar bar-surge" id="pub-bar-surge" style="grid-column: span 24; display: none;">--</div>
-        </div>
-        <div class="surge-alert" id="pub-surge-alert" style="display: none; background-color: rgba(20, 184, 166, 0.1); border-left: 4px solid var(--teal); padding: 15px; border-radius: 8px; margin-top: 20px; font-size: 14px; color: var(--text-sub);">
-            <strong>🌊 Storm Surge Note 風暴潮提示:</strong> <span id="pub-surge-note">--</span>
-        </div>
-    </div>
+<div class="forecast-banner" id="pub-banner">
+<div class="header-left">
+<img src="logo.png" alt="HKMTCAC" class="header-logo" onerror="this.style.display='none'">
+<div>
+<h1 id="pub-title">🌀 HKMTCAC 風暴影響程度預報</h1>
+<p class="subtitle">Storm Impact Level Forecast | <span id="pub-time">Updated: --</span></p>
+</div>
+</div>
+<div class="forecast-badge" id="pub-badge">LOADING...</div>
+</div>
 
-    <!-- Action Cards -->
-    <div class="cards-grid">
-        <div class="card" id="pub-card-expect">
-            <h3>🌀 What to Expect 預期情況</h3>
-            <ul id="pub-list-expect"></ul>
-        </div>
-        <div class="card" id="pub-card-affect">
-            <h3>🚧 How it Affects You 潛在影響</h3>
-            <ul id="pub-list-affect"></ul>
-        </div>
-        <div class="card" id="pub-card-action">
-            <h3>🛑 Recommended Actions 防範措施</h3>
-            <ul id="pub-list-action"></ul>
-        </div>
-    </div>
+<div class="timeline-section">
+<div class="timeline-header"><span>風雨影響時序 (Impact Timeline)</span><span>Forecast is subject to change</span></div>
+<div class="time-labels">
+<div></div>
+<div class="time-label" id="pub-time-1">--</div>
+<div class="time-label" id="pub-time-2">--</div>
+<div class="time-label" id="pub-time-3">--</div>
+<div class="time-label" id="pub-time-4">--</div>
+<div class="time-label" id="pub-time-5">--</div>
+<div class="time-label" id="pub-time-6">--</div>
+</div>
+<div class="gantt-chart">
+<div class="row-label">市區風力<br>Urban Wind</div>
+<div class="gantt-bar bar-wind-strong" id="pub-bar-urban" style="grid-column: span 24;">--</div>
+<div class="row-label">離岸/高地風力<br>Offshore Wind</div>
+<div class="gantt-bar bar-wind-gale" id="pub-bar-offshore" style="grid-column: span 24;">--</div>
+<div class="row-label">降雨<br>Rainfall</div>
+<div class="gantt-bar bar-rain-showers" id="pub-bar-rain" style="grid-column: span 24;">--</div>
+<div class="row-label">風暴潮<br>Storm Surge</div>
+<div class="gantt-bar bar-surge" id="pub-bar-surge" style="grid-column: span 24; display: none;">--</div>
+</div>
+<div class="surge-alert" id="pub-surge-alert" style="display:none;background-color:rgba(20,184,166,0.1);border-left:4px solid var(--teal);padding:15px;border-radius:8px;margin-top:20px;font-size:14px;color:var(--text-sub);">
+<strong>🌊 Storm Surge Note 風暴潮提示:</strong> <span id="pub-surge-note">--</span>
+</div>
+</div>
 
-    <!-- WIM Drawer -->
-    <div class="wim-drawer">
-        <div class="wim-header" onclick="toggleWIM()">
-            <span>🔍 View Analyst Methodology (8x8 Warning Impact Matrix) 查看分析 methodology</span>
-            <span id="pub-wim-icon">➕</span>
-        </div>
-        <div class="wim-content" id="pub-wim-content">
-            <div class="wim-layout">
-                <div class="matrix-container">
-                    <div class="matrix-grid" id="pub-wim-grid"></div>
-                </div>
-                <div class="text-panel">
-                    <div class="text-header">
-                        <h2 id="pub-wim-title">--</h2>
-                        <div class="badge" id="pub-wim-badge">Impact Level</div>
-                    </div>
-                    <div class="info-card">
-                        <h3>🌬️ 風力 Wind</h3>
-                        <p id="pub-wim-wind">--</p>
-                    </div>
-                    <div class="info-card">
-                        <h3>🌧️ 降雨 Rainfall</h3>
-                        <p id="pub-wim-rain">--</p>
-                    </div>
-                    <div class="info-card">
-                        <h3>🛑 建議行動 Actions</h3>
-                        <ul id="pub-wim-action"><li>--</li></ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+<div class="cards-grid">
+<div class="card"><h3>🌀 What to Expect 預期情況</h3><ul id="pub-list-expect"></ul></div>
+<div class="card"><h3>🚧 How it Affects You 潛在影響</h3><ul id="pub-list-affect"></ul></div>
+<div class="card"><h3>🛑 Recommended Actions 防範措施</h3><ul id="pub-list-action"></ul></div>
+</div>
 
-    <div class="disclaimer">⚠️ Forecasts are subject to change. Please monitor official HKO updates.</div>
+<div class="wim-drawer">
+<div class="wim-header" onclick="toggleWIM()">
+<span>🔍 View Analyst Methodology (8x8 WIM)</span>
+<span id="pub-wim-icon">➕</span>
+</div>
+<div class="wim-content" id="pub-wim-content">
+<div class="wim-layout">
+<div class="matrix-container"><div class="matrix-grid" id="pub-wim-grid"></div></div>
+<div class="text-panel">
+<div class="text-header"><h2 id="pub-wim-title">--</h2><div class="badge" id="pub-wim-badge">Impact Level</div></div>
+<div class="info-card"><h3>🌬️ 風力 Wind</h3><p id="pub-wim-wind">--</p></div>
+<div class="info-card"><h3>🌧️ 降雨 Rainfall</h3><p id="pub-wim-rain">--</p></div>
+<div class="info-card"><h3>🛑 建議行動 Actions</h3><ul id="pub-wim-action"><li>--</li></ul></div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="disclaimer">⚠️ Forecasts are subject to change. Please monitor official HKO updates.</div>
 </div>
 
 <script>
-    // ============================================================
-    // YOUR GOOGLE APPS SCRIPT WEB APP URL
-    // ============================================================
-    const GAS_URL = "https://script.googleusercontent.com/macros/echo?user_content_key=AUkAhnRS0LGCM6CJt9ZzlDwlOX9-pHtJTaSkVKJKr7uhefSxU8wGnenU-GToveB98QS3q-z6f9GMPEkSgzv6oGFYwa9uM0dtkKbEuZESWlsa7yD1fAvBQJckqHbm7dt3FwYTCkCPT-dSv7W7d5WrwfFF2XZg5uhcVxWuEVdvS2u8MDEsOg5JqqE1mCt1USQKUCkHy2gcaN-gbr1PdEgCE1iT9T9VA3p7RW1WhQOUX0Sbd47vxmnD-SHHR8e6dxc863NP4RKToZVRYtHI_5zcb6c&lib=M_PfwfcLnGDrzBna2YavA7tnyflBWhNKp";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzMW0KA8Ao7zl2uhsaP1c4n0rylMRRKrJy8ZK99108FpLk3Cuy37sjKT7r5n5yXOW8/exec";
 
-    // ============================================================
-    // WIM CALCULATION LOGIC
-    // ============================================================
-    function calculateWIMLevel(certainty, impact) {
-        const score = parseInt(certainty) + parseInt(impact);
-        if (score <= 3) return { level: 'LOW 較低', color: '#22c55e', bg: 'linear-gradient(90deg, #166534, #22c55e)' };
-        if (score <= 7) return { level: 'MODERATE 中等', color: '#eab308', bg: 'linear-gradient(90deg, #854d0e, #eab308)' };
-        if (score <= 11) return { level: 'SEVERE 較高', color: '#f97316', bg: 'linear-gradient(90deg, #9a3412, #f97316)' };
-        return { level: 'EXTREME 極高', color: '#ef4444', bg: 'linear-gradient(90deg, #7f1d1d, #ef4444)' };
-    }
+function calculateWIMLevel(c,i){
+const s=parseInt(c)+parseInt(i);
+if(s<=3)return{level:'LOW 較低',color:'#22c55e',bg:'linear-gradient(90deg,#166534,#22c55e)'};
+if(s<=7)return{level:'MODERATE 中等',color:'#eab308',bg:'linear-gradient(90deg,#854d0e,#eab308)'};
+if(s<=11)return{level:'SEVERE 較高',color:'#f97316',bg:'linear-gradient(90deg,#9a3412,#f97316)'};
+return{level:'EXTREME 極高',color:'#ef4444',bg:'linear-gradient(90deg,#7f1d1d,#ef4444)'};
+}
 
-    // ============================================================
-    // LOAD DATA FROM GOOGLE SHEETS
-    // ============================================================
-    async function loadDashboardData() {
-        try {
-            const response = await fetch(GAS_URL);
-            const data = await response.json();
+function loadDashboardData(){
+fetch(GAS_URL)
+.then(r=>r.json())
+.then(d=>{console.log("Loaded via fetch");processData(d);})
+.catch(e=>{console.warn("Fetch failed, trying JSONP...");loadViaJSONP();});
+}
 
-            if (data.error) {
-                console.warn("Backend says:", data.error);
-                return;
-            }
+function loadViaJSONP(){
+const cb="gasCb_"+Date.now();
+window[cb]=(d)=>{console.log("Loaded via JSONP");processData(d);delete window[cb];if(s.parentNode)s.parentNode.removeChild(s);};
+const s=document.createElement("script");
+s.src=GAS_URL+"?callback="+cb;
+s.onerror=()=>{console.error("JSONP also failed");document.getElementById('pub-badge').textContent="ERROR";delete window[cb];};
+document.body.appendChild(s);
+}
 
-            // --- Header ---
-            document.getElementById('pub-title').textContent = "🌀 " + (data.stormName || "HKMTCAC 風暴影響程度預報");
-            document.getElementById('pub-time').textContent = "Updated: " + (data.updateTime || "--");
+function processData(data){
+if(!data||data.error){console.warn("Backend error:",data&&data.error);document.getElementById('pub-badge').textContent="NO DATA";return;}
+document.getElementById('pub-title').textContent="🌀 "+(data.stormName||"HKMTCAC 風暴影響程度預報");
+document.getElementById('pub-time').textContent="Updated: "+(data.updateTime||"--");
+const certainty=parseInt(data.certainty)||0;
+const impact=parseInt(data.impact)||0;
+const result=calculateWIMLevel(certainty,impact);
+const badge=document.getElementById('pub-badge');
+const banner=document.getElementById('pub-banner');
+badge.textContent="FORECAST IMPACT LEVEL: "+result.level;
+badge.style.borderColor=result.color;
+banner.style.background=result.bg;
 
-            // --- WIM Calculated Level ---
-            const certainty = parseInt(data.certainty) || 0;
-            const impact = parseInt(data.impact) || 0;
-            const result = calculateWIMLevel(certainty, impact);
+if(data.timeline&&data.timeline.length){
+data.timeline.forEach((slot,i)=>{
+const el=document.getElementById('pub-time-'+(i+1));
+if(el)el.textContent=slot.time||"";
+});
+}
 
-            const badge = document.getElementById('pub-badge');
-            const banner = document.getElementById('pub-banner');
-            badge.textContent = `FORECAST IMPACT LEVEL: ${result.level}`;
-            badge.style.borderColor = result.color;
-            banner.style.background = result.bg;
+function barClass(text,type){
+const s=(text||"").toString();
+if(type==='wind'){
+if(s.indexOf('颶風')!==-1||s.indexOf('暴風')!==-1)return 'bar-wind-storm';
+if(s.indexOf('烈風')!==-1)return 'bar-wind-gale';
+return 'bar-wind-strong';
+}
+if(type==='rain'){
+if(s.indexOf('大驟雨')!==-1||s.indexOf('暴雨')!==-1||s.indexOf('強烈')!==-1)return 'bar-rain-heavy';
+return 'bar-rain-showers';
+}
+return '';
+}
 
-            // --- Timeline Times ---
-            if (data.timeline && data.timeline.length > 0) {
-                data.timeline.forEach((slot, i) => {
-                    const idx = i + 1;
-                    const timeEl = document.getElementById('pub-time-' + idx);
-                    if (timeEl) timeEl.textContent = slot.time || "";
-                });
-            }
+const fs=(data.timeline&&data.timeline[0])||{};
+const ub=document.getElementById('pub-bar-urban');
+ub.className='gantt-bar '+barClass(fs.urbanWind,'wind');
+ub.textContent=fs.urbanWind||'--';
+const ob=document.getElementById('pub-bar-offshore');
+ob.className='gantt-bar '+barClass(fs.offshoreWind,'wind');
+ob.textContent=fs.offshoreWind||'--';
+const rb=document.getElementById('pub-bar-rain');
+rb.className='gantt-bar '+barClass(fs.rainfall,'rain');
+rb.textContent=fs.rainfall||'--';
 
-            // --- Timeline Bars (using Chinese keyword mapping) ---
-            function getBarClass(text, type) {
-                const str = (text || "").toString();
-                if (type === 'wind') {
-                    if (str.includes('颶風') || str.includes('暴風')) return 'bar-wind-storm';
-                    if (str.includes('烈風')) return 'bar-wind-gale';
-                    if (str.includes('強風')) return 'bar-wind-strong';
-                    return 'bar-wind-strong';
-                }
-                if (type === 'rain') {
-                    if (str.includes('大驟雨') || str.includes('暴雨') || str.includes('強烈')) return 'bar-rain-heavy';
-                    return 'bar-rain-showers';
-                }
-                if (type === 'surge') {
-                    if (str.toLowerCase().includes('yes')) return 'bar-surge';
-                    return '';
-                }
-                return '';
-            }
+if(data.surgeActive==='Yes'){
+document.getElementById('pub-bar-surge').style.display='flex';
+document.getElementById('pub-bar-surge').textContent='⚠️ Surge Warning 風暴潮警告';
+document.getElementById('pub-surge-alert').style.display='block';
+document.getElementById('pub-surge-note').textContent=data.surgeNote||'';
+}
 
-            const firstSlot = data.timeline && data.timeline[0] ? data.timeline[0] : {};
+const fl=(t)=>!t?'':t.split('\n').filter(l=>l.trim()).map(l=>'<li>'+l.replace(/^- /,'')+'</li>').join('');
+document.getElementById('pub-list-expect').innerHTML=fl(data.listExpect||('- '+(data.wimWind||'')+'\n- '+(data.wimRain||'')));
+document.getElementById('pub-list-affect').innerHTML=fl(data.listAffect||data.wimAction||'');
+document.getElementById('pub-list-action').innerHTML=fl(data.listAction||data.wimAction||'');
+document.getElementById('pub-wim-wind').textContent=data.wimWind||'--';
+document.getElementById('pub-wim-rain').textContent=data.wimRain||'--';
+document.getElementById('pub-wim-action').innerHTML='<li>'+(data.wimAction||'--')+'</li>';
 
-            const urbanBar = document.getElementById('pub-bar-urban');
-            urbanBar.className = 'gantt-bar ' + getBarClass(firstSlot.urbanWind, 'wind');
-            urbanBar.textContent = firstSlot.urbanWind || '--';
+const g=document.getElementById('pub-wim-grid');
+if(g.children.length){
+g.querySelectorAll('.cell').forEach(c=>{
+c.classList.remove('active');
+if(parseInt(c.dataset.x)===impact&&parseInt(c.dataset.y)===(7-certainty))c.classList.add('active');
+});
+}
+}
 
-            const offshoreBar = document.getElementById('pub-bar-offshore');
-            offshoreBar.className = 'gantt-bar ' + getBarClass(firstSlot.offshoreWind, 'wind');
-            offshoreBar.textContent = firstSlot.offshoreWind || '--';
+function generateWIMGrid(){
+const grid=document.getElementById('pub-wim-grid');
+grid.innerHTML='';
+const yL=["極高 95-99%","較高 90-95%","高 80-90%","中高 60-80%","中等 40-60%","中低 20-40%","稍低 10-20%","較低 0-10%"];
+const xL=["較低","稍低","中低","中等-中高","中高","高","較高","極高"];
+grid.appendChild(document.createElement('div'));
+xL.forEach(l=>{const d=document.createElement('div');d.className='label-x';d.textContent=l;grid.appendChild(d);});
+for(let y=0;y<8;y++){
+const yD=document.createElement('div');yD.className='label-y';yD.textContent=yL[y];grid.appendChild(yD);
+for(let x=0;x<8;x++){
+const c=document.createElement('div');
+c.className='cell';c.dataset.x=x;c.dataset.y=y;
+const s=(7-y)+x;
+if(s<=2)c.classList.add('c-grey');else if(s<=4)c.classList.add('c-blue');
+else if(s<=6)c.classList.add('c-green');else if(s<=8)c.classList.add('c-yellow');
+else if(s<=10)c.classList.add('c-orange');else if(s<=12)c.classList.add('c-red');
+else c.classList.add('c-dark');
+grid.appendChild(c);
+}
+}
+}
 
-            const rainBar = document.getElementById('pub-bar-rain');
-            rainBar.className = 'gantt-bar ' + getBarClass(firstSlot.rainfall, 'rain');
-            rainBar.textContent = firstSlot.rainfall || '--';
+function toggleWIM(){
+const c=document.getElementById('pub-wim-content');
+const i=document.getElementById('pub-wim-icon');
+c.classList.toggle('active');
+i.textContent=c.classList.contains('active')?'➖':'➕';
+}
 
-            // --- Storm Surge ---
-            const surgeBar = document.getElementById('pub-bar-surge');
-            const surgeAlert = document.getElementById('pub-surge-alert');
-            if (data.surgeActive === 'Yes') {
-                surgeBar.style.display = 'flex';
-                surgeBar.textContent = '⚠️ Surge Warning 風暴潮警告';
-                surgeAlert.style.display = 'block';
-                document.getElementById('pub-surge-note').textContent = data.surgeNote || '';
-            } else {
-                surgeBar.style.display = 'none';
-                surgeAlert.style.display = 'none';
-            }
-
-            // --- Action Cards ---
-            const formatList = (text) => {
-                if (!text) return '';
-                return text.split('\n').filter(l => l.trim()).map(l => `<li>${l.replace(/^- /, '')}</li>`).join('');
-            };
-
-            const expectText = data.listExpect || ('- ' + (data.wimWind || '') + '\n- ' + (data.wimRain || ''));
-            const affectText = data.listAffect || (data.wimAction || '');
-            const actionText = data.listAction || (data.wimAction || '');
-
-            document.getElementById('pub-list-expect').innerHTML = formatList(expectText);
-            document.getElementById('pub-list-affect').innerHTML = formatList(affectText);
-            document.getElementById('pub-list-action').innerHTML = formatList(actionText);
-
-            // --- WIM Drawer ---
-            document.getElementById('pub-wim-wind').textContent = data.wimWind || '--';
-            document.getElementById('pub-wim-rain').textContent = data.wimRain || '--';
-            document.getElementById('pub-wim-action').innerHTML = `<li>${data.wimAction || '--'}</li>`;
-
-            // --- WIM Grid Active Cell ---
-            const pubGrid = document.getElementById('pub-wim-grid');
-            if (pubGrid.children.length > 0) {
-                pubGrid.querySelectorAll('.cell').forEach(c => {
-                    c.classList.remove('active');
-                    if (parseInt(c.dataset.x) === impact && parseInt(c.dataset.y) === (7 - certainty)) {
-                        c.classList.add('active');
-                    }
-                });
-            }
-
-            // --- WIM Badge Color ---
-            const wimBadge = document.getElementById('pub-wim-badge');
-            if (impact <= 1) wimBadge.style.background = 'var(--green)';
-            else if (impact <= 3) wimBadge.style.background = 'var(--yellow)';
-            else if (impact <= 5) wimBadge.style.background = 'var(--orange)';
-            else wimBadge.style.background = 'var(--red)';
-
-        } catch (err) {
-            console.error('Failed to load dashboard data:', err);
-        }
-    }
-
-    // ============================================================
-    // GENERATE 8x8 WIM MATRIX (Public View)
-    // ============================================================
-    function generateWIMGrid() {
-        const grid = document.getElementById('pub-wim-grid');
-        if (!grid) return;
-        grid.innerHTML = '';
-
-        const yLabels = ["極高 95-99%", "較高 90-95%", "高 80-90%", "中高 60-80%", "中等 40-60%", "中低 20-40%", "稍低 10-20%", "較低 0-10%"];
-        const xLabels = ["較低", "稍低", "中低", "中等-中高", "中高", "高", "較高", "極高"];
-
-        grid.appendChild(document.createElement('div'));
-        xLabels.forEach(label => {
-            const div = document.createElement('div');
-            div.className = 'label-x';
-            div.textContent = label;
-            grid.appendChild(div);
-        });
-
-        for (let y = 0; y < 8; y++) {
-            const yDiv = document.createElement('div');
-            yDiv.className = 'label-y';
-            yDiv.textContent = yLabels[y];
-            grid.appendChild(yDiv);
-
-            for (let x = 0; x < 8; x++) {
-                const cell = document.createElement('div');
-                cell.className = 'cell';
-                cell.dataset.x = x;
-                cell.dataset.y = y;
-
-                const score = (7 - y) + x;
-                if (score <= 2) cell.classList.add('c-grey');
-                else if (score <= 4) cell.classList.add('c-blue');
-                else if (score <= 6) cell.classList.add('c-green');
-                else if (score <= 8) cell.classList.add('c-yellow');
-                else if (score <= 10) cell.classList.add('c-orange');
-                else if (score <= 12) cell.classList.add('c-red');
-                else cell.classList.add('c-dark');
-
-                grid.appendChild(cell);
-            }
-        }
-    }
-
-    // ============================================================
-    // UI TOGGLES
-    // ============================================================
-    function toggleWIM() {
-        const content = document.getElementById('pub-wim-content');
-        const icon = document.getElementById('pub-wim-icon');
-        content.classList.toggle('active');
-        icon.textContent = content.classList.contains('active') ? '➖' : '➕';
-    }
-
-    // ============================================================
-    // INITIALIZE
-    // ============================================================
-    window.onload = () => {
-        generateWIMGrid();
-        loadDashboardData();
-    };
+window.onload=()=>{generateWIMGrid();loadDashboardData();};
 </script>
-
 </body>
 </html>
