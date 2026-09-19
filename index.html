@@ -3,124 +3,199 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HKMTCAC 風暴影響程度預報</title>
+<title>HKMTCAC 風暴影響程度預報 | Storm Impact Level Forecast</title>
 <style>
-:root{--bg-dark:#0f172a;--panel-bg:#1e293b;--text-main:#f8fafc;--text-sub:#94a3b8;--orange:#f97316;--red:#ef4444;--blue:#3b82f6;--teal:#14b8a6;--green:#22c55e;--yellow:#eab308;}
-body{font-family:'Segoe UI',Tahoma,sans-serif;background:var(--bg-dark);color:var(--text-main);margin:0;padding:20px;display:flex;justify-content:center;padding-bottom:50px;}
-.main-wrapper{max-width:1100px;width:100%;}
-.forecast-banner{background:linear-gradient(90deg,#9a3412,var(--orange));border-radius:12px;padding:20px;display:flex;justify-content:space-between;align-items:center;margin-bottom:25px;box-shadow:0 4px 20px rgba(249,115,22,0.3);transition:all 0.3s ease;}
-.header-left{display:flex;align-items:center;gap:15px;}
-.header-logo{width:60px;height:60px;object-fit:contain;background:rgba(255,255,255,0.1);border-radius:50%;padding:5px;}
-.forecast-banner h1{margin:0;font-size:22px;color:white;}
-.forecast-banner .subtitle{margin:5px 0 0 0;font-size:14px;color:rgba(255,255,255,0.8);}
-.forecast-badge{background:rgba(0,0,0,0.3);padding:10px 20px;border-radius:30px;font-weight:bold;font-size:16px;color:white;border:2px solid white;text-align:center;}
+:root{--bg-dark:#0f172a;--panel-bg:#1e293b;--text-main:#f8fafc;--text-sub:#94a3b8;--orange:#f97316;--red:#ef4444;--blue:#3b82f6;--light-blue:#60a5fa;--teal:#14b8a6;}
+body{font-family:'Segoe UI','Noto Sans TC',Tahoma,sans-serif;background:var(--bg-dark);color:var(--text-main);margin:0;padding:20px;display:flex;justify-content:center;padding-bottom:50px;}
+.main-wrapper{max-width:1150px;width:100%;}
+
+.forecast-banner{background:linear-gradient(90deg,#9a3412,var(--orange));border-radius:12px;padding:20px 24px;display:flex;justify-content:space-between;align-items:center;margin-bottom:25px;box-shadow:0 4px 20px rgba(249,115,22,0.3);transition:all 0.3s ease;gap:20px;flex-wrap:wrap;}
+.header-left{display:flex;align-items:center;gap:16px;}
+.header-logo{width:64px;height:64px;object-fit:contain;background:rgba(255,255,255,0.12);border-radius:50%;padding:6px;flex-shrink:0;}
+.forecast-banner h1{margin:0;font-size:26px;color:white;font-weight:700;letter-spacing:1px;}
+.subtitle-en{margin:3px 0 0 0;font-size:14px;color:rgba(255,255,255,0.9);letter-spacing:0.5px;}
+.storm-info{margin:8px 0 0 0;font-size:13px;color:rgba(255,255,255,0.85);font-weight:500;}
+.storm-info .divider{margin:0 8px;opacity:0.5;}
+.forecast-badge{background:rgba(0,0,0,0.35);padding:12px 22px;border-radius:30px;font-weight:bold;font-size:15px;color:white;border:2px solid white;text-align:center;white-space:nowrap;}
+
 .timeline-section{background-color:var(--panel-bg);border-radius:12px;padding:25px;margin-bottom:25px;overflow-x:auto;}
 .timeline-header{display:flex;justify-content:space-between;border-bottom:1px solid #334155;padding-bottom:10px;margin-bottom:20px;font-weight:bold;color:var(--text-sub);font-size:14px;}
-.gantt-chart{display:grid;grid-template-columns:120px repeat(24,1fr);gap:2px;min-width:800px;}
-.time-labels{display:grid;grid-template-columns:120px repeat(6,1fr);gap:2px;margin-bottom:10px;font-size:11px;color:var(--text-sub);text-align:center;min-width:800px;}
-.time-label{border-left:1px solid #334155;display:flex;justify-content:center;align-items:center;}
-.row-label{font-size:13px;color:var(--text-sub);display:flex;align-items:center;justify-content:flex-end;padding-right:10px;height:40px;}
-.gantt-bar{height:40px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;color:white;box-shadow:0 2px 5px rgba(0,0,0,0.2);padding:0 5px;}
+.time-labels{display:grid;grid-template-columns:120px repeat(24,1fr);gap:2px;margin-bottom:10px;font-size:11px;color:var(--text-sub);text-align:center;min-width:850px;}
+.time-label{border-left:1px solid #334155;display:flex;justify-content:center;align-items:center;grid-column:span 4;padding:0 4px;font-weight:600;}
+.gantt-chart{display:grid;grid-template-columns:120px repeat(24,1fr);gap:2px;min-width:850px;}
+.row-label{font-size:13px;color:var(--text-sub);display:flex;align-items:center;justify-content:flex-end;padding-right:10px;height:40px;text-align:right;line-height:1.2;}
+.gantt-bar{height:40px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;color:white;box-shadow:0 2px 4px rgba(0,0,0,0.25);padding:0 4px;text-align:center;line-height:1.1;overflow:hidden;transition:all 0.3s ease;}
+.bar-wind-light{background-color:var(--light-blue);}
 .bar-wind-strong{background-color:var(--blue);}
 .bar-wind-gale{background-color:var(--orange);}
 .bar-wind-storm{background-color:var(--red);}
-.bar-rain-showers{background-color:#8b5cf6;}
+.bar-rain-showers{background-color:#a78bfa;}
+.bar-rain-thunder{background-color:#8b5cf6;}
 .bar-rain-heavy{background-color:#6d28d9;}
 .bar-surge{background-color:var(--teal);border:2px solid white;}
+
 .cards-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;margin-top:25px;}
 .card{background-color:var(--panel-bg);border-radius:12px;padding:20px;border-top:4px solid var(--orange);}
 .card h3{margin-top:0;display:flex;align-items:center;gap:10px;font-size:16px;}
 .card ul{padding-left:20px;margin:0;color:var(--text-sub);font-size:14px;line-height:1.6;}
+.card ul li{margin-bottom:4px;}
+
 .wim-drawer{margin-top:30px;background-color:var(--panel-bg);border-radius:12px;overflow:hidden;}
-.wim-header{padding:15px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:bold;color:var(--text-sub);background-color:rgba(255,255,255,0.02);}
+.wim-header{padding:16px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:bold;color:var(--text-sub);background-color:rgba(255,255,255,0.03);font-size:13px;line-height:1.5;gap:12px;}
+.wim-header-text{flex:1;}
+.wim-header-text .en{display:block;color:var(--text-main);}
+.wim-header-text .zh{display:block;font-size:12px;color:var(--text-sub);margin-top:2px;}
 .wim-content{padding:20px;display:none;}
 .wim-content.active{display:block;}
-.wim-layout{display:grid;grid-template-columns:1.2fr 1fr;gap:30px;}
-.matrix-container{overflow-x:auto;}
-.matrix-grid{display:grid;grid-template-columns:90px repeat(8,1fr);grid-template-rows:repeat(8,35px);gap:3px;min-width:500px;}
-.label-y{font-size:10px;color:var(--text-sub);display:flex;align-items:center;justify-content:flex-end;padding-right:8px;text-align:right;}
-.label-x{font-size:10px;color:var(--text-sub);display:flex;align-items:flex-end;justify-content:center;text-align:center;padding-bottom:5px;writing-mode:vertical-rl;transform:rotate(180deg);}
-.cell{border-radius:3px;position:relative;}
-.c-grey{background-color:#334155;}.c-blue{background-color:#1e3a8a;}
-.c-green{background-color:#166534;}.c-yellow{background-color:#854d0e;}
-.c-orange{background-color:#9a3412;}.c-red{background-color:#7f1d1d;}
-.c-dark{background-color:#450a0a;}
-.cell.active{border:2px solid white;box-shadow:0 0 10px rgba(255,255,255,0.8);z-index:20;}
-.cell.active::after{content:'🌀';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:16px;}
-.text-panel{background-color:#0f172a;padding:20px;border-radius:8px;display:flex;flex-direction:column;gap:15px;}
+
+.wim-inner{background:linear-gradient(135deg,#0f172a,#1e293b);border-radius:12px;padding:16px;overflow-x:auto;}
+
+.wim-topbar{display:flex;align-items:center;gap:14px;background:linear-gradient(90deg,#dc2626,#ef4444);padding:12px 20px;border-radius:10px;margin-bottom:18px;}
+.wim-topbar-logo{width:48px;height:48px;object-fit:contain;background:rgba(255,255,255,0.15);border-radius:50%;padding:4px;flex-shrink:0;}
+.wim-topbar-text{flex:1;text-align:center;}
+.wim-topbar-zh{color:white;font-weight:700;font-size:18px;letter-spacing:1px;}
+.wim-topbar-en{color:rgba(255,255,255,0.95);font-size:13px;margin-top:3px;letter-spacing:0.5px;}
+
+.wim-matrix-row{display:flex;gap:12px;min-width:720px;}
+
+.wim-vert-title{writing-mode:vertical-rl;color:#0ea5e9;font-weight:700;font-size:16px;display:flex;align-items:center;justify-content:center;text-align:center;padding:8px 4px;letter-spacing:3px;line-height:1.3;}
+
+.wim-ylabels{display:flex;flex-direction:column;gap:3px;justify-content:flex-start;padding-top:0;flex-shrink:0;}
+.wim-ylabel{height:48px;display:flex;flex-direction:column;justify-content:center;align-items:flex-end;padding-right:10px;text-align:right;line-height:1.15;}
+.wim-ylabel .zh{color:white;font-weight:700;font-size:14px;letter-spacing:1px;}
+.wim-ylabel .en{color:#94a3b8;font-size:11px;}
+.wim-ylabel .pct{color:#64748b;font-size:11px;}
+
+.wim-grid-col{flex:1;min-width:0;}
+.wim-grid{display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,48px);gap:3px;}
+.wim-cell{border-radius:3px;position:relative;transition:transform 0.15s ease;}
+.wim-cell:hover{transform:scale(1.05);z-index:5;outline:2px solid white;}
+
+.c-grey{background-color:#64748b;}
+.c-blue{background-color:#3b82f6;}
+.c-green{background-color:#84cc16;}
+.c-yellow{background-color:#facc15;}
+.c-orange{background-color:#f97316;}
+.c-pink{background-color:#ec4899;}
+.c-purple{background-color:#a855f7;}
+.c-red{background-color:#ef4444;}
+
+.wim-cell.active{border:2px solid white;box-shadow:0 0 12px rgba(255,255,255,0.9);z-index:20;}
+.wim-cell.active::after{content:'✓';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:28px;font-weight:bold;color:#ffffff;text-shadow:0 0 6px #000,0 0 6px #000;}
+
+.wim-xlabels{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;margin-top:6px;}
+.wim-xlabel{text-align:center;line-height:1.15;padding:2px 0;}
+.wim-xlabel .zh{color:white;font-weight:700;font-size:13px;display:block;letter-spacing:0.5px;}
+.wim-xlabel .en{color:#94a3b8;font-size:10px;display:block;margin-top:2px;}
+
+.wim-bottomtitle{text-align:center;color:#22d3ee;font-weight:700;font-size:15px;margin-top:14px;letter-spacing:1px;}
+
+.wim-source{margin-top:16px;padding-top:12px;border-top:1px solid #334155;font-size:11px;color:var(--text-sub);text-align:center;line-height:1.7;font-style:italic;}
+
+.wim-info-panel{background:#0f172a;padding:18px;border-radius:8px;display:flex;flex-direction:column;gap:14px;margin-top:16px;}
 .text-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #334155;padding-bottom:10px;}
-.text-header h2{margin:0;font-size:16px;}
-.text-header .badge{padding:4px 10px;border-radius:15px;font-size:12px;font-weight:bold;background:var(--orange);color:white;}
+.text-header h2{margin:0;font-size:15px;color:white;}
+.text-header .badge{padding:4px 10px;border-radius:15px;font-size:11px;font-weight:bold;background:var(--orange);color:white;}
 .info-card{background:#1e293b;border-radius:6px;padding:12px;border-left:3px solid var(--orange);}
 .info-card h3{margin:0 0 8px 0;font-size:13px;color:white;}
-.info-card p,.info-card ul{margin:0;font-size:12px;color:var(--text-sub);line-height:1.5;}
+.info-card p,.info-card ul{margin:0;font-size:12px;color:var(--text-sub);line-height:1.6;}
 .info-card ul{padding-left:15px;}
+
 .disclaimer{text-align:center;font-size:12px;color:var(--text-sub);margin-top:20px;border-top:1px solid #334155;padding-top:15px;}
-@media(max-width:900px){.wim-layout{grid-template-columns:1fr;}}
+@media(max-width:900px){
+  .forecast-banner h1{font-size:20px;}
+  .forecast-badge{font-size:13px;padding:10px 16px;}
+  .wim-matrix-row{min-width:640px;}
+  .wim-ylabel{height:44px;}
+  .wim-grid{grid-template-rows:repeat(8,44px);}
+}
 </style>
 </head>
 <body>
 <div class="main-wrapper">
 
 <div class="forecast-banner" id="pub-banner">
-<div class="header-left">
-<img src="logo.png" alt="HKMTCAC" class="header-logo" onerror="this.style.display='none'">
-<div>
-<h1 id="pub-title">🌀 HKMTCAC 風暴影響程度預報</h1>
-<p class="subtitle">Storm Impact Level Forecast | <span id="pub-time">Updated: --</span></p>
-</div>
-</div>
-<div class="forecast-badge" id="pub-badge">LOADING...</div>
+  <div class="header-left">
+    <img src="logo.png" alt="HKMTCAC" class="header-logo" onerror="this.style.display='none'">
+    <div>
+      <h1 id="pub-title">風暴影響程度預報</h1>
+      <p class="subtitle-en">Storm Impact Level Forecast</p>
+      <p class="storm-info">🌀 <span id="pub-storm-name">--</span><span class="divider">·</span>Updated: <span id="pub-time">--</span></p>
+    </div>
+  </div>
+  <div class="forecast-badge" id="pub-badge">LOADING...</div>
 </div>
 
 <div class="timeline-section">
-<div class="timeline-header"><span>風雨影響時序 (Impact Timeline)</span><span>Forecast is subject to change</span></div>
-<div class="time-labels">
-<div></div>
-<div class="time-label" id="pub-time-1">--</div>
-<div class="time-label" id="pub-time-2">--</div>
-<div class="time-label" id="pub-time-3">--</div>
-<div class="time-label" id="pub-time-4">--</div>
-<div class="time-label" id="pub-time-5">--</div>
-<div class="time-label" id="pub-time-6">--</div>
-</div>
-<div class="gantt-chart">
-<div class="row-label">市區風力<br>Urban Wind</div>
-<div class="gantt-bar bar-wind-strong" id="pub-bar-urban" style="grid-column: span 24;">--</div>
-<div class="row-label">離岸/高地風力<br>Offshore Wind</div>
-<div class="gantt-bar bar-wind-gale" id="pub-bar-offshore" style="grid-column: span 24;">--</div>
-<div class="row-label">降雨<br>Rainfall</div>
-<div class="gantt-bar bar-rain-showers" id="pub-bar-rain" style="grid-column: span 24;">--</div>
-<div class="row-label">風暴潮<br>Storm Surge</div>
-<div class="gantt-bar bar-surge" id="pub-bar-surge" style="grid-column: span 24; display: none;">--</div>
-</div>
-<div class="surge-alert" id="pub-surge-alert" style="display:none;background-color:rgba(20,184,166,0.1);border-left:4px solid var(--teal);padding:15px;border-radius:8px;margin-top:20px;font-size:14px;color:var(--text-sub);">
-<strong>🌊 Storm Surge Note 風暴潮提示:</strong> <span id="pub-surge-note">--</span>
-</div>
+  <div class="timeline-header">
+    <span>風雨影響時序 (Impact Timeline)</span>
+    <span>Forecast is subject to change</span>
+  </div>
+  <div class="time-labels">
+    <div></div>
+    <div class="time-label" id="pub-time-1">--</div>
+    <div class="time-label" id="pub-time-2">--</div>
+    <div class="time-label" id="pub-time-3">--</div>
+    <div class="time-label" id="pub-time-4">--</div>
+    <div class="time-label" id="pub-time-5">--</div>
+    <div class="time-label" id="pub-time-6">--</div>
+  </div>
+  <div class="gantt-chart" id="pub-gantt"></div>
+  <div class="surge-alert" id="pub-surge-alert" style="display:none;background-color:rgba(20,184,166,0.1);border-left:4px solid var(--teal);padding:15px;border-radius:8px;margin-top:20px;font-size:14px;color:var(--text-sub);">
+    <strong>🌊 Storm Surge Note 風暴潮提示:</strong> <span id="pub-surge-note">--</span>
+  </div>
 </div>
 
 <div class="cards-grid">
-<div class="card"><h3>🌀 What to Expect 預期情況</h3><ul id="pub-list-expect"></ul></div>
-<div class="card"><h3>🚧 How it Affects You 潛在影響</h3><ul id="pub-list-affect"></ul></div>
-<div class="card"><h3>🛑 Recommended Actions 防範措施</h3><ul id="pub-list-action"></ul></div>
+  <div class="card"><h3>🌀 What to Expect 預期情況</h3><ul id="pub-list-expect"></ul></div>
+  <div class="card"><h3>🚧 How it Affects You 潛在影響</h3><ul id="pub-list-affect"></ul></div>
+  <div class="card"><h3>🛑 Recommended Actions 防範措施</h3><ul id="pub-list-action"></ul></div>
 </div>
 
 <div class="wim-drawer">
-<div class="wim-header" onclick="toggleWIM()">
-<span>🔍 View Analyst Methodology (8x8 WIM)</span>
-<span id="pub-wim-icon">➕</span>
-</div>
-<div class="wim-content" id="pub-wim-content">
-<div class="wim-layout">
-<div class="matrix-container"><div class="matrix-grid" id="pub-wim-grid"></div></div>
-<div class="text-panel">
-<div class="text-header"><h2 id="pub-wim-title">--</h2><div class="badge" id="pub-wim-badge">Impact Level</div></div>
-<div class="info-card"><h3>🌬️ 風力 Wind</h3><p id="pub-wim-wind">--</p></div>
-<div class="info-card"><h3>🌧️ 降雨 Rainfall</h3><p id="pub-wim-rain">--</p></div>
-<div class="info-card"><h3>🛑 建議行動 Actions</h3><ul id="pub-wim-action"><li>--</li></ul></div>
-</div>
-</div>
-</div>
+  <div class="wim-header" onclick="toggleWIM()">
+    <span class="wim-header-text">
+      <span class="en">🔍 Based off from HKMTCAC Tropical Cyclone Impact Level of Wind and Rain</span>
+      <span class="zh">來源：HKMTCAC 風暴風雨影響程度預報</span>
+    </span>
+    <span id="pub-wim-icon">➕</span>
+  </div>
+  <div class="wim-content" id="pub-wim-content">
+    <div class="wim-inner">
+      <div class="wim-topbar">
+        <img src="logo.png" alt="" class="wim-topbar-logo" onerror="this.style.display='none'">
+        <div class="wim-topbar-text">
+          <div class="wim-topbar-zh">HKMTCAC -- 風暴風雨影響程度預報</div>
+          <div class="wim-topbar-en">Tropical Cyclone impact level of wind and rain</div>
+        </div>
+      </div>
+
+      <div class="wim-matrix-row">
+        <div class="wim-vert-title">發生機率 %rate</div>
+        <div class="wim-ylabels" id="pub-wim-ylabels"></div>
+        <div class="wim-grid-col">
+          <div class="wim-grid" id="pub-wim-grid"></div>
+          <div class="wim-xlabels" id="pub-wim-xlabels"></div>
+          <div class="wim-bottomtitle">Impact level of wind and rain 風雨影響程度</div>
+        </div>
+      </div>
+
+      <div class="wim-source">
+        Based off from HKMTCAC Tropical Cyclone Impact Level of Wind and Rain<br>
+        來源：HKMTCAC 風暴風雨影響程度預報
+      </div>
+    </div>
+
+    <div class="wim-info-panel">
+      <div class="text-header">
+        <h2 id="pub-wim-title">Current Assessment</h2>
+        <div class="badge" id="pub-wim-badge">Impact Level</div>
+      </div>
+      <div class="info-card"><h3>🌬️ 風力 Wind</h3><p id="pub-wim-wind">--</p></div>
+      <div class="info-card"><h3>🌧️ 降雨 Rainfall</h3><p id="pub-wim-rain">--</p></div>
+      <div class="info-card"><h3>🛑 建議行動 Actions</h3><ul id="pub-wim-action"><li>--</li></ul></div>
+    </div>
+  </div>
 </div>
 
 <div class="disclaimer">⚠️ Forecasts are subject to change. Please monitor official HKO updates.</div>
@@ -129,129 +204,204 @@ body{font-family:'Segoe UI',Tahoma,sans-serif;background:var(--bg-dark);color:va
 <script>
 const GAS_URL = "https://script.google.com/macros/s/AKfycbzMW0KA8Ao7zl2uhsaP1c4n0rylMRRKrJy8ZK99108FpLk3Cuy37sjKT7r5n5yXOW8/exec";
 
+const Y_LABELS = [
+  {zh:"極高", en:"Extreme",          pct:"95-99%"},
+  {zh:"較高", en:"Relatively High",  pct:"90-95%"},
+  {zh:"高",   en:"High",             pct:"80-90%"},
+  {zh:"中高", en:"Med- High",        pct:"60-80%"},
+  {zh:"中等", en:"Medium",           pct:"40-60%"},
+  {zh:"中低", en:"Med-low",          pct:"20-40%"},
+  {zh:"稍低", en:"Slightly low",     pct:"10-20%"},
+  {zh:"較低", en:"relatively low",   pct:"0-10%"}
+];
+
+const X_LABELS = [
+  {zh:"較低", en:"relatively low"},
+  {zh:"稍低", en:"slightly low"},
+  {zh:"中低", en:"Med-low"},
+  {zh:"中等-中高", en:"Med-Med High"},
+  {zh:"中高", en:"Med High"},
+  {zh:"高",   en:"High"},
+  {zh:"較高", en:"Relatively high"},
+  {zh:"極高", en:"Extreme"}
+];
+
+const COLORS = [
+  {max:1,  cls:'c-grey'},
+  {max:3,  cls:'c-blue'},
+  {max:5,  cls:'c-green'},
+  {max:7,  cls:'c-yellow'},
+  {max:9,  cls:'c-orange'},
+  {max:11, cls:'c-pink'},
+  {max:13, cls:'c-purple'},
+  {max:14, cls:'c-red'}
+];
+
 function calculateWIMLevel(c,i){
-const s=parseInt(c)+parseInt(i);
-if(s<=3)return{level:'LOW 較低',color:'#22c55e',bg:'linear-gradient(90deg,#166534,#22c55e)'};
-if(s<=7)return{level:'MODERATE 中等',color:'#eab308',bg:'linear-gradient(90deg,#854d0e,#eab308)'};
-if(s<=11)return{level:'SEVERE 較高',color:'#f97316',bg:'linear-gradient(90deg,#9a3412,#f97316)'};
-return{level:'EXTREME 極高',color:'#ef4444',bg:'linear-gradient(90deg,#7f1d1d,#ef4444)'};
+  const s=parseInt(c)+parseInt(i);
+  if(s<=3)return{level:'LOW 較低',color:'#22c55e',bg:'linear-gradient(90deg,#166534,#22c55e)'};
+  if(s<=7)return{level:'MODERATE 中等',color:'#eab308',bg:'linear-gradient(90deg,#854d0e,#eab308)'};
+  if(s<=11)return{level:'SEVERE 較高',color:'#f97316',bg:'linear-gradient(90deg,#9a3412,#f97316)'};
+  return{level:'EXTREME 極高',color:'#ef4444',bg:'linear-gradient(90deg,#7f1d1d,#ef4444)'};
 }
 
 function loadDashboardData(){
-fetch(GAS_URL)
-.then(r=>r.json())
-.then(d=>{console.log("Loaded via fetch");processData(d);})
-.catch(e=>{console.warn("Fetch failed, trying JSONP...");loadViaJSONP();});
+  fetch(GAS_URL)
+    .then(r=>r.json())
+    .then(d=>{console.log("Loaded via fetch");processData(d);})
+    .catch(e=>{console.warn("Fetch failed, trying JSONP...");loadViaJSONP();});
+}
+function loadViaJSONP(){
+  const cb="gasCb_"+Date.now();
+  window[cb]=(d)=>{console.log("Loaded via JSONP");processData(d);delete window[cb];if(s.parentNode)s.parentNode.removeChild(s);};
+  const s=document.createElement("script");
+  s.src=GAS_URL+"?callback="+cb;
+  s.onerror=()=>{console.error("JSONP failed");document.getElementById('pub-badge').textContent="ERROR";delete window[cb];};
+  document.body.appendChild(s);
 }
 
-function loadViaJSONP(){
-const cb="gasCb_"+Date.now();
-window[cb]=(d)=>{console.log("Loaded via JSONP");processData(d);delete window[cb];if(s.parentNode)s.parentNode.removeChild(s);};
-const s=document.createElement("script");
-s.src=GAS_URL+"?callback="+cb;
-s.onerror=()=>{console.error("JSONP also failed");document.getElementById('pub-badge').textContent="ERROR";delete window[cb];};
-document.body.appendChild(s);
+function windClass(text){
+  const s=(text||"").toString();
+  if(s.indexOf('颶風')!==-1||s.indexOf('暴風')!==-1)return 'bar-wind-storm';
+  if(s.indexOf('烈風')!==-1)return 'bar-wind-gale';
+  if(s.indexOf('強風')!==-1)return 'bar-wind-strong';
+  return 'bar-wind-light';
+}
+function rainClass(text){
+  const s=(text||"").toString();
+  if(s.indexOf('大驟雨')!==-1||s.indexOf('暴雨')!==-1||s.indexOf('強烈')!==-1)return 'bar-rain-heavy';
+  if(s.indexOf('雷暴')!==-1)return 'bar-rain-thunder';
+  return 'bar-rain-showers';
+}
+
+function buildTimeline(timeline){
+  const g=document.getElementById('pub-gantt');
+  g.innerHTML='';
+  const slots = timeline && timeline.length ? timeline : [];
+  const rowData = [
+    {key:'urbanWind',   label:'市區風力<br>Urban Wind',       classFn:windClass},
+    {key:'offshoreWind',label:'離岸/高地風力<br>Offshore Wind',classFn:windClass},
+    {key:'rainfall',    label:'降雨<br>Rainfall',              classFn:rainClass},
+    {key:'surge',       label:'風暴潮<br>Storm Surge',         classFn:null}
+  ];
+  rowData.forEach(row=>{
+    const l=document.createElement('div');
+    l.className='row-label';
+    l.innerHTML=row.label;
+    g.appendChild(l);
+    for(let i=0;i<6;i++){
+      const slot = slots[i] || {};
+      const val = slot[row.key] || '';
+      const bar=document.createElement('div');
+      bar.style.gridColumn='span 4';
+      if(row.key==='surge'){
+        if(val && val.toLowerCase()==='yes'){
+          bar.className='gantt-bar bar-surge';
+          bar.textContent='⚠️';
+        } else {
+          bar.className='gantt-bar';
+          bar.style.background='#334155';
+          bar.textContent='';
+        }
+      } else {
+        bar.className='gantt-bar '+row.classFn(val);
+        bar.textContent=val || '';
+      }
+      g.appendChild(bar);
+    }
+  });
 }
 
 function processData(data){
-if(!data||data.error){console.warn("Backend error:",data&&data.error);document.getElementById('pub-badge').textContent="NO DATA";return;}
-document.getElementById('pub-title').textContent="🌀 "+(data.stormName||"HKMTCAC 風暴影響程度預報");
-document.getElementById('pub-time').textContent="Updated: "+(data.updateTime||"--");
-const certainty=parseInt(data.certainty)||0;
-const impact=parseInt(data.impact)||0;
-const result=calculateWIMLevel(certainty,impact);
-const badge=document.getElementById('pub-badge');
-const banner=document.getElementById('pub-banner');
-badge.textContent="FORECAST IMPACT LEVEL: "+result.level;
-badge.style.borderColor=result.color;
-banner.style.background=result.bg;
+  if(!data||data.error){console.warn("Backend error:",data&&data.error);document.getElementById('pub-badge').textContent="NO DATA";return;}
+  document.getElementById('pub-title').textContent="風暴影響程度預報";
+  document.getElementById('pub-storm-name').textContent=data.stormName||"--";
+  document.getElementById('pub-time').textContent=data.updateTime||"--";
 
-if(data.timeline&&data.timeline.length){
-data.timeline.forEach((slot,i)=>{
-const el=document.getElementById('pub-time-'+(i+1));
-if(el)el.textContent=slot.time||"";
-});
-}
+  const certainty=parseInt(data.certainty)||0;
+  const impact=parseInt(data.impact)||0;
+  const result=calculateWIMLevel(certainty,impact);
+  const badge=document.getElementById('pub-badge');
+  const banner=document.getElementById('pub-banner');
+  badge.textContent="FORECAST IMPACT LEVEL: "+result.level;
+  badge.style.borderColor=result.color;
+  banner.style.background=result.bg;
 
-function barClass(text,type){
-const s=(text||"").toString();
-if(type==='wind'){
-if(s.indexOf('颶風')!==-1||s.indexOf('暴風')!==-1)return 'bar-wind-storm';
-if(s.indexOf('烈風')!==-1)return 'bar-wind-gale';
-return 'bar-wind-strong';
-}
-if(type==='rain'){
-if(s.indexOf('大驟雨')!==-1||s.indexOf('暴雨')!==-1||s.indexOf('強烈')!==-1)return 'bar-rain-heavy';
-return 'bar-rain-showers';
-}
-return '';
-}
+  if(data.timeline&&data.timeline.length){
+    data.timeline.forEach((slot,i)=>{
+      const el=document.getElementById('pub-time-'+(i+1));
+      if(el)el.textContent=slot.time||"--";
+    });
+  }
+  buildTimeline(data.timeline);
 
-const fs=(data.timeline&&data.timeline[0])||{};
-const ub=document.getElementById('pub-bar-urban');
-ub.className='gantt-bar '+barClass(fs.urbanWind,'wind');
-ub.textContent=fs.urbanWind||'--';
-const ob=document.getElementById('pub-bar-offshore');
-ob.className='gantt-bar '+barClass(fs.offshoreWind,'wind');
-ob.textContent=fs.offshoreWind||'--';
-const rb=document.getElementById('pub-bar-rain');
-rb.className='gantt-bar '+barClass(fs.rainfall,'rain');
-rb.textContent=fs.rainfall||'--';
+  if(data.surgeActive==='Yes'){
+    document.getElementById('pub-surge-alert').style.display='block';
+    document.getElementById('pub-surge-note').textContent=data.surgeNote||'';
+  } else {
+    document.getElementById('pub-surge-alert').style.display='none';
+  }
 
-if(data.surgeActive==='Yes'){
-document.getElementById('pub-bar-surge').style.display='flex';
-document.getElementById('pub-bar-surge').textContent='⚠️ Surge Warning 風暴潮警告';
-document.getElementById('pub-surge-alert').style.display='block';
-document.getElementById('pub-surge-note').textContent=data.surgeNote||'';
+  const fl=(t)=>!t?'':t.split('\n').filter(l=>l.trim()).map(l=>'<li>'+l.replace(/^- /,'')+'</li>').join('');
+  document.getElementById('pub-list-expect').innerHTML=fl(data.listExpect||('- '+(data.wimWind||'')+'\n- '+(data.wimRain||'')));
+  document.getElementById('pub-list-affect').innerHTML=fl(data.listAffect||data.wimAction||'');
+  document.getElementById('pub-list-action').innerHTML=fl(data.listAction||data.wimAction||'');
+  document.getElementById('pub-wim-wind').textContent=data.wimWind||'--';
+  document.getElementById('pub-wim-rain').textContent=data.wimRain||'--';
+  document.getElementById('pub-wim-action').innerHTML='<li>'+(data.wimAction||'--')+'</li>';
+  document.getElementById('pub-wim-title').textContent='Impact Level: '+result.level;
+
+  const g=document.getElementById('pub-wim-grid');
+  if(g.children.length){
+    g.querySelectorAll('.cell').forEach(c=>{
+      c.classList.remove('active');
+      if(parseInt(c.dataset.x)===impact&&parseInt(c.dataset.y)===(7-certainty))c.classList.add('active');
+    });
+  }
 }
 
-const fl=(t)=>!t?'':t.split('\n').filter(l=>l.trim()).map(l=>'<li>'+l.replace(/^- /,'')+'</li>').join('');
-document.getElementById('pub-list-expect').innerHTML=fl(data.listExpect||('- '+(data.wimWind||'')+'\n- '+(data.wimRain||'')));
-document.getElementById('pub-list-affect').innerHTML=fl(data.listAffect||data.wimAction||'');
-document.getElementById('pub-list-action').innerHTML=fl(data.listAction||data.wimAction||'');
-document.getElementById('pub-wim-wind').textContent=data.wimWind||'--';
-document.getElementById('pub-wim-rain').textContent=data.wimRain||'--';
-document.getElementById('pub-wim-action').innerHTML='<li>'+(data.wimAction||'--')+'</li>';
+function generateWIM(){
+  const yc=document.getElementById('pub-wim-ylabels');
+  yc.innerHTML='';
+  Y_LABELS.forEach(l=>{
+    const d=document.createElement('div');
+    d.className='wim-ylabel';
+    d.innerHTML='<span class="zh">'+l.zh+'</span><span class="en">'+l.en+'</span><span class="pct">'+l.pct+'</span>';
+    yc.appendChild(d);
+  });
 
-const g=document.getElementById('pub-wim-grid');
-if(g.children.length){
-g.querySelectorAll('.cell').forEach(c=>{
-c.classList.remove('active');
-if(parseInt(c.dataset.x)===impact&&parseInt(c.dataset.y)===(7-certainty))c.classList.add('active');
-});
-}
-}
+  const grid=document.getElementById('pub-wim-grid');
+  grid.innerHTML='';
+  for(let y=0;y<8;y++){
+    for(let x=0;x<8;x++){
+      const c=document.createElement('div');
+      c.className='wim-cell';c.dataset.x=x;c.dataset.y=y;
+      const score=(7-y)+x;
+      let cls='c-red';
+      for(const band of COLORS){ if(score<=band.max){cls=band.cls;break;} }
+      c.classList.add(cls);
+      grid.appendChild(c);
+    }
+  }
 
-function generateWIMGrid(){
-const grid=document.getElementById('pub-wim-grid');
-grid.innerHTML='';
-const yL=["極高 95-99%","較高 90-95%","高 80-90%","中高 60-80%","中等 40-60%","中低 20-40%","稍低 10-20%","較低 0-10%"];
-const xL=["較低","稍低","中低","中等-中高","中高","高","較高","極高"];
-grid.appendChild(document.createElement('div'));
-xL.forEach(l=>{const d=document.createElement('div');d.className='label-x';d.textContent=l;grid.appendChild(d);});
-for(let y=0;y<8;y++){
-const yD=document.createElement('div');yD.className='label-y';yD.textContent=yL[y];grid.appendChild(yD);
-for(let x=0;x<8;x++){
-const c=document.createElement('div');
-c.className='cell';c.dataset.x=x;c.dataset.y=y;
-const s=(7-y)+x;
-if(s<=2)c.classList.add('c-grey');else if(s<=4)c.classList.add('c-blue');
-else if(s<=6)c.classList.add('c-green');else if(s<=8)c.classList.add('c-yellow');
-else if(s<=10)c.classList.add('c-orange');else if(s<=12)c.classList.add('c-red');
-else c.classList.add('c-dark');
-grid.appendChild(c);
-}
-}
+  const xc=document.getElementById('pub-wim-xlabels');
+  xc.innerHTML='';
+  X_LABELS.forEach(l=>{
+    const d=document.createElement('div');
+    d.className='wim-xlabel';
+    d.innerHTML='<span class="zh">'+l.zh+'</span><span class="en">'+l.en+'</span>';
+    xc.appendChild(d);
+  });
 }
 
 function toggleWIM(){
-const c=document.getElementById('pub-wim-content');
-const i=document.getElementById('pub-wim-icon');
-c.classList.toggle('active');
-i.textContent=c.classList.contains('active')?'➖':'➕';
+  const c=document.getElementById('pub-wim-content');
+  const i=document.getElementById('pub-wim-icon');
+  c.classList.toggle('active');
+  i.textContent=c.classList.contains('active')?'➖':'➕';
 }
 
-window.onload=()=>{generateWIMGrid();loadDashboardData();};
+window.onload=()=>{generateWIM();loadDashboardData();};
 </script>
 </body>
 </html>
