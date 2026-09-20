@@ -19,7 +19,6 @@ body{font-family:'Segoe UI','Noto Sans TC',Tahoma,sans-serif;background:var(--bg
 .storm-info{margin:6px 0 0 0;font-size:13px;color:rgba(255,255,255,0.85);font-weight:500;}
 .forecast-badge{background:rgba(0,0,0,0.35);padding:12px 22px;border-radius:30px;font-weight:bold;font-size:16px;color:white;border:2px solid white;text-align:center;white-space:nowrap;}
 
-/* TIMELINE — dynamic column count set via JS */
 .timeline-section{background-color:var(--panel-bg);border-radius:12px;padding:25px;margin-bottom:25px;overflow-x:auto;}
 .timeline-header{display:flex;justify-content:space-between;border-bottom:1px solid #334155;padding-bottom:10px;margin-bottom:20px;font-weight:bold;color:var(--text-sub);font-size:16px;}
 .time-labels{display:grid;gap:3px;margin-bottom:10px;font-size:18px;color:var(--text-sub);text-align:center;}
@@ -36,13 +35,14 @@ body{font-family:'Segoe UI','Noto Sans TC',Tahoma,sans-serif;background:var(--bg
 .bar-rain-heavy{background-color:#6d28d9;}
 .bar-surge{background-color:var(--teal);border:2px solid white;font-size:26px;}
 
-/* ACTION CARDS — yellow text */
 .cards-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;margin-top:25px;}
 .card{background-color:var(--panel-bg);border-radius:12px;padding:20px;border-top:4px solid var(--orange);}
 .card h3{margin-top:0;display:flex;align-items:center;gap:10px;font-size:16px;color:white;}
-.card ul{padding-left:20px;margin:0;color:var(--yellow-txt);font-size:14px;line-height:1.7;font-weight:500;}
-.card ul li{margin-bottom:6px;}
-.card ul li::marker{color:var(--yellow-txt);}
+.card ul{padding-left:20px;margin:0;color:var(--yellow-txt);font-size:14px;line-height:1.7;font-weight:500;list-style:none;}
+.card ul li{margin-bottom:6px;padding-left:16px;position:relative;}
+.card ul li::before{content:'•';position:absolute;left:0;color:var(--yellow-txt);font-weight:900;}
+.card ul li.card-empty{color:#94a3b8;font-style:italic;font-weight:400;}
+.card ul li.card-empty::before{content:'—';color:#94a3b8;}
 
 .wim-drawer{margin-top:30px;background-color:var(--panel-bg);border-radius:12px;overflow:hidden;}
 .wim-header{padding:16px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:bold;color:var(--text-sub);background-color:rgba(255,255,255,0.03);font-size:13px;line-height:1.5;gap:12px;}
@@ -170,17 +170,13 @@ body{font-family:'Segoe UI','Noto Sans TC',Tahoma,sans-serif;background:var(--bg
   <div class="forecast-badge" id="pub-badge">LOADING...</div>
 </div>
 
-<div class="timeline-section">
+<div class="timeline-section" id="pub-timeline-section">
   <div class="timeline-header">
     <span>風雨影響時序 (Impact Timeline)</span>
     <span>Forecast is subject to change</span>
   </div>
-  <div class="time-labels" id="pub-time-labels">
-    <!-- Populated dynamically by JS -->
-  </div>
-  <div class="gantt-chart" id="pub-gantt">
-    <!-- Populated dynamically by JS -->
-  </div>
+  <div class="time-labels" id="pub-time-labels"></div>
+  <div class="gantt-chart" id="pub-gantt"></div>
   <div class="surge-alert" id="pub-surge-alert" style="display:none;background-color:rgba(20,184,166,0.1);border-left:4px solid var(--teal);padding:15px;border-radius:8px;margin-top:20px;font-size:14px;color:var(--text-sub);">
     <strong>🌊 Storm Surge Note 風暴潮提示:</strong> <span id="pub-surge-note">--</span>
   </div>
@@ -287,8 +283,15 @@ const COLORS = [
   {max:14, cls:'c-red'}
 ];
 
+function isYes(v){
+  if(v == null) return false;
+  const s = String(v).trim().toLowerCase();
+  return s === 'yes' || s === 'y' || s === '有' || s === '是' || s === 'true' || s === '1';
+}
+
 function calculateWIMLevel(c,i){
   const s=parseInt(c)+parseInt(i);
+  if(s===20)return{level:'N/A 不適用',color:'#475569',bg:'linear-gradient(90deg,#1e293b,#475569)'};
   if(s<=3)return{level:'LOW 較低',color:'#22c55e',bg:'linear-gradient(90deg,#166534,#22c55e)'};
   if(s<=7)return{level:'MODERATE 中等',color:'#eab308',bg:'linear-gradient(90deg,#854d0e,#eab308)'};
   if(s<=11)return{level:'SEVERE 較高',color:'#f97316',bg:'linear-gradient(90deg,#9a3412,#f97316)'};
@@ -298,12 +301,12 @@ function calculateWIMLevel(c,i){
 function loadDashboardData(){
   fetch(GAS_URL)
     .then(r=>r.json())
-    .then(d=>{console.log("Loaded via fetch");processData(d);})
+    .then(d=>{console.log("Loaded via fetch", d);processData(d);})
     .catch(e=>{console.warn("Fetch failed, trying JSONP...");loadViaJSONP();});
 }
 function loadViaJSONP(){
   const cb="gasCb_"+Date.now();
-  window[cb]=(d)=>{console.log("Loaded via JSONP");processData(d);delete window[cb];if(s.parentNode)s.parentNode.removeChild(s);};
+  window[cb]=(d)=>{console.log("Loaded via JSONP", d);processData(d);delete window[cb];if(s.parentNode)s.parentNode.removeChild(s);};
   const s=document.createElement("script");
   s.src=GAS_URL+"?callback="+cb;
   s.onerror=()=>{console.error("JSONP failed");document.getElementById('pub-badge').textContent="ERROR";delete window[cb];};
@@ -324,29 +327,26 @@ function rainClass(text){
   return 'bar-rain-showers';
 }
 
-/* Build the timeline dynamically based on number of slots */
 function buildTimeline(timeline){
   const g=document.getElementById('pub-gantt');
   const tl=document.getElementById('pub-time-labels');
+  const section=document.getElementById('pub-timeline-section');
   g.innerHTML='';
   tl.innerHTML='';
 
   const slots = timeline && timeline.length ? timeline : [];
   const count = slots.length;
 
-  // If no slots, don't render anything
   if(count === 0){
-    tl.style.gridTemplateColumns = '130px';
-    g.style.gridTemplateColumns = '130px';
+    section.style.display = 'none';
     return;
   }
+  section.style.display = 'block';
 
-  // Set grid columns dynamically: 130px label column + N equal columns
   const cols = '130px repeat(' + count + ', minmax(60px, 1fr))';
   tl.style.gridTemplateColumns = cols;
   g.style.gridTemplateColumns = cols;
 
-  // Build time labels (top row)
   const spacer = document.createElement('div');
   tl.appendChild(spacer);
   for(let i=0;i<count;i++){
@@ -357,7 +357,6 @@ function buildTimeline(timeline){
     tl.appendChild(lbl);
   }
 
-  // Build bar rows
   const rowData = [
     {key:'urbanWind',   label:'市區風力<br>Urban Wind',       classFn:windClass},
     {key:'offshoreWind',label:'離岸/高地風力<br>Offshore Wind',classFn:windClass},
@@ -374,7 +373,7 @@ function buildTimeline(timeline){
       const val = slot[row.key] || '';
       const bar=document.createElement('div');
       if(row.key==='surge'){
-        if(val && val.toLowerCase()==='yes'){
+        if(isYes(val)){
           bar.className='gantt-bar bar-surge';
           bar.textContent='⚠️';
         } else {
@@ -389,6 +388,28 @@ function buildTimeline(timeline){
       g.appendChild(bar);
     }
   });
+}
+
+function renderList(elementId, rawText){
+  const el = document.getElementById(elementId);
+  const text = (rawText == null) ? '' : String(rawText);
+
+  const items = text.split('\n')
+    .map(l => l.trim())
+    .filter(l => l.length > 0 && /[^\-\s]/.test(l));
+
+  if(items.length === 0){
+    el.innerHTML = '<li class="card-empty">暫無資料 / No data</li>';
+    return;
+  }
+  el.innerHTML = items.map(l => '<li>' + l.replace(/^-\s*/, '') + '</li>').join('');
+}
+
+function buildExpectFallback(data){
+  const parts = [];
+  if(data.wimWind && data.wimWind.trim()) parts.push('- ' + data.wimWind.trim());
+  if(data.wimRain && data.wimRain.trim()) parts.push('- ' + data.wimRain.trim());
+  return parts.join('\n');
 }
 
 function processData(data){
@@ -408,28 +429,36 @@ function processData(data){
 
   buildTimeline(data.timeline);
 
-  if(data.surgeActive==='Yes'){
+  const anySlotSurge = data.timeline && data.timeline.some(s => isYes(s.surge));
+  const surgeOn = isYes(data.surgeActive) || anySlotSurge;
+  if(surgeOn){
     document.getElementById('pub-surge-alert').style.display='block';
-    document.getElementById('pub-surge-note').textContent=data.surgeNote||'';
+    document.getElementById('pub-surge-note').textContent = data.surgeNote || '沿岸地區可能出現水浸，請遠離海邊及低窪地區。';
   } else {
     document.getElementById('pub-surge-alert').style.display='none';
   }
 
-  const fl=(t)=>!t?'':t.split('\n').filter(l=>l.trim()).map(l=>'<li>'+l.replace(/^- /,'')+'</li>').join('');
-  document.getElementById('pub-list-expect').innerHTML=fl(data.listExpect||('- '+(data.wimWind||'')+'\n- '+(data.wimRain||'')));
-  document.getElementById('pub-list-affect').innerHTML=fl(data.listAffect||data.wimAction||'');
-  document.getElementById('pub-list-action').innerHTML=fl(data.listAction||data.wimAction||'');
-  document.getElementById('pub-wim-wind').textContent=data.wimWind||'--';
-  document.getElementById('pub-wim-rain').textContent=data.wimRain||'--';
-  document.getElementById('pub-wim-action').innerHTML='<li>'+(data.wimAction||'--')+'</li>';
-  document.getElementById('pub-wim-title').textContent='Impact Level: '+result.level;
+  const expectRaw = (data.listExpect || '').trim() || buildExpectFallback(data);
+  const affectRaw = (data.listAffect || '').trim() || (data.wimAction || '').trim();
+  const actionRaw = (data.listAction || '').trim() || (data.wimAction || '').trim();
 
+  renderList('pub-list-expect', expectRaw);
+  renderList('pub-list-affect', affectRaw);
+  renderList('pub-list-action', actionRaw);
+
+  document.getElementById('pub-wim-wind').textContent = (data.wimWind && data.wimWind.trim()) ? data.wimWind : '暫無資料 / No data';
+  document.getElementById('pub-wim-rain').textContent = (data.wimRain && data.wimRain.trim()) ? data.wimRain : '暫無資料 / No data';
+  const wimAct = (data.wimAction && data.wimAction.trim()) ? data.wimAction : '暫無資料 / No data';
+  document.getElementById('pub-wim-action').innerHTML = '<li>' + wimAct + '</li>';
+  document.getElementById('pub-wim-title').textContent = 'Impact Level: ' + result.level;
+
+  const isNA = (certainty + impact === 20);
   const g=document.getElementById('pub-wim-grid');
   if(g.children.length){
     let hasActive=false;
     g.querySelectorAll('.wim-cell').forEach(c=>{
       c.classList.remove('active');
-      if(parseInt(c.dataset.x)===impact&&parseInt(c.dataset.y)===(7-certainty)){
+      if(!isNA && parseInt(c.dataset.x)===impact && parseInt(c.dataset.y)===(7-certainty)){
         c.classList.add('active');
         hasActive=true;
       }
