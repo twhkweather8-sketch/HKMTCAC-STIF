@@ -423,7 +423,7 @@ function processData(data){
   const result=calculateWIMLevel(certainty,impact);
   const badge=document.getElementById('pub-badge');
   const banner=document.getElementById('pub-banner');
-  badge.textContent="FORECAST IMPACT LEVEL: "+result.level;
+  badge.textContent="風暴影響程度/FORECAST IMPACT LEVEL: "+result.level;
   badge.style.borderColor=result.color;
   banner.style.background=result.bg;
 
